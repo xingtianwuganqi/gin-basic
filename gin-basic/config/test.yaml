@@ -1,0 +1,18 @@
+database:
+  host: 192.168.0.102
+  port: 3306
+  username: root
+  password: 123456
+  database: cutepet
+  charset: utf8
+
+app:
+  port: 8080
+  debug: true
+  log_level: debug
+  secret_key: testsecret
+  env: test
+
+api_keys:
+  google: test-google-api-key
+  facebook: test-facebook-api-key

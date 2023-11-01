@@ -1,0 +1,18 @@
+database:
+  host: 172.17.0.1
+  port: 3306
+  username: petproject
+  password: YhKiwmATtRJ2Jhme
+  database: petproject
+  charset: utf8mb4
+
+app:
+  port: 8082
+  debug: false
+  log_level: debug
+  secret_key: testsecret
+  env: production
+
+api_keys:
+  google: test-google-api-key
+  facebook: test-facebook-api-key
