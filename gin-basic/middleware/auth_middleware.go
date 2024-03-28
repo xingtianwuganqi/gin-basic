@@ -2,14 +2,16 @@ package middleware
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 	"pet-project/db"
 	"pet-project/models"
+	"pet-project/response"
 	"pet-project/util"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type MyClaims struct {
@@ -67,7 +69,7 @@ func JWTTokenMiddleware() func(c *gin.Context) {
 		var user models.UserInfo
 		userResult := db.DB.Where("ID = ?", mc.UserId).Find(&user)
 		if errors.Is(userResult.Error, gorm.ErrRecordNotFound) {
-			util.Fail(c, util.ApiCode.UserNotFont, util.ApiMessage.UserNotFound)
+			response.Fail(c, util.ApiCode.UserNotFont, util.ApiMessage.UserNotFound)
 			return
 		}
 

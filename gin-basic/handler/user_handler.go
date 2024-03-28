@@ -2,12 +2,14 @@ package handler
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"pet-project/db"
 	"pet-project/middleware"
 	"pet-project/models"
+	"pet-project/response"
 	"pet-project/util"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type LoginInfo struct {
@@ -28,7 +30,7 @@ type LoginUserInfo struct {
 func UserRegister(c *gin.Context) {
 	var login LoginInfo
 	if err := c.ShouldBind(&login); err != nil {
-		util.Fail(c, util.ApiCode.ParamError, util.ApiMessage.ParamError)
+		response.Fail(c, util.ApiCode.ParamError, util.ApiMessage.ParamError)
 		return
 	}
 	var findUser models.UserInfo
@@ -40,13 +42,13 @@ func UserRegister(c *gin.Context) {
 		}
 		result := db.DB.Create(&user)
 		if result.Error != nil {
-			util.Fail(c, util.ApiCode.CreateErr, util.ApiMessage.CreateErr)
+			response.Fail(c, util.ApiCode.CreateErr, util.ApiMessage.CreateErr)
 			return
 		}
 		userId := user.ID
 		token, err := middleware.GenToken(userId)
 		if err != nil {
-			util.Fail(c, util.ApiCode.ServerError, util.ApiMessage.ServerError)
+			response.Fail(c, util.ApiCode.ServerError, util.ApiMessage.ServerError)
 			return
 		}
 		data := LoginUserInfo{
@@ -56,9 +58,9 @@ func UserRegister(c *gin.Context) {
 			Email:  user.Email,
 			Token:  token,
 		}
-		util.Success(c, data)
+		response.Success(c, data)
 	} else {
-		util.Fail(c, util.ApiCode.UserExistsError, util.ApiMessage.UserExistsError)
+		response.Fail(c, util.ApiCode.UserExistsError, util.ApiMessage.UserExistsError)
 	}
 
 }
@@ -67,13 +69,13 @@ func UserRegister(c *gin.Context) {
 func UserPhoneLogin(c *gin.Context) {
 	var login LoginInfo
 	if err := c.ShouldBind(&login); err != nil {
-		util.Fail(c, util.ApiCode.ParamError, util.ApiMessage.ParamError)
+		response.Fail(c, util.ApiCode.ParamError, util.ApiMessage.ParamError)
 		return
 	}
 	var user models.UserInfo
 	result := db.DB.Where("phone = ?", login.Phone).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		util.Fail(c, util.ApiCode.QueryError, "该手机号未注册")
+		response.Fail(c, util.ApiCode.QueryError, "该手机号未注册")
 		return
 	}
 	if user.Password == login.Password {
@@ -81,7 +83,7 @@ func UserPhoneLogin(c *gin.Context) {
 		userId := user.ID
 		token, err := middleware.GenToken(userId)
 		if err != nil {
-			util.Fail(c, util.ApiCode.ServerError, util.ApiMessage.ServerError)
+			response.Fail(c, util.ApiCode.ServerError, util.ApiMessage.ServerError)
 			return
 		}
 		data := LoginUserInfo{
@@ -91,8 +93,8 @@ func UserPhoneLogin(c *gin.Context) {
 			Email:  user.Email,
 			Token:  token,
 		}
-		util.Success(c, data)
+		response.Success(c, data)
 	} else {
-		util.Fail(c, 300, "密码错误")
+		response.Fail(c, 300, "密码错误")
 	}
 }
