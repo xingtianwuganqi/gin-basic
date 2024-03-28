@@ -4,7 +4,7 @@ type Codes struct {
 	// #成功
 	Success uint // 200
 	// #失败
-	Fail uint // 300
+	Fail uint // 400
 
 	//# 认证错误
 	AuthError uint // 401
@@ -23,67 +23,59 @@ type Codes struct {
 	//MSG_UNKNOWN_ERROR = '未知错误'
 
 	//# 参数错误
-	ParamError uint // 201
+	ParamError uint // 420
 	//MSG_PARAMETER_ERROR = '参数错误'
 
-	//# 拒绝访问
-	RejectError uint // 202
-	//MSG_REJECT_ERROR = '拒绝访问'
-
-	//# 拒绝访问
-	MethodError uint // 203
-	//MSG_METHOD_ERROR = '请求方法错误'
-
 	//# 缺少参数
-	ParamLack uint // 204
+	ParamLack uint // 421
 	//MSG_PARAMETER_LACK = '缺少参数'
 
-	//# 业务上的错误
-	UserExistsError uint // 205
-	//MSG_BUSSINESS_ERROR = '用户已存在'
-
 	//# 查询失败
-	QueryError uint //206
+	QueryError uint //423
 	//MSG_QUERY_ERROR = '查询失败'
 
 	//# 查询为空
-	EmptyError uint // 207
+	EmptyError uint // 424
 	//MSG_EMPTY_ERROR = '查询为空'
 
 	//# 整顿期间
-	CleanUp uint // 208
+	CleanUp uint // 426
 	//MSG_CLEAN_UP = '整顿期间'
 
 	//# 未绑定手机号
-	PhoneUnbind uint // 209
+	PhoneUnbind uint // 430
 	//MSG_PHONE_UNBIND = '未绑定手机号'
 
 	//# 手机验证
-	PhoneUncheck uint //210
+	PhoneUncheck uint //431
 	//MSG_PHONE_UNCHECK = '未验证手机号'
 
 	//# 不支持邮箱登录
-	EmailError uint // 211
+	EmailError uint // 432
 	//MSG_EMAIL_ERROR = '暂不支持邮箱登录'
 
-	PhoneUsed uint // 212
+	PhoneUsed uint // 433
 	//MSG_PHONE_USED = '该手机号已被使用'
 
 	CreateErr   uint
-	UserNotFont uint
+
+	//# 用户已存在
+	UserExistsError uint // 440
+	//MSG_BUSSINESS_ERROR = '用户已存在'
+
+	// 用户不存在
+	UserNotFont uint // 441
 }
 
 var ApiCode = &Codes{
 	Success:         200,
-	Fail:            0,
+	Fail:            400,
 	AuthError:       401,
 	ServerError:     500,
 	NotFoundError:   404,
 	UnknownError:    405,
-	ParamError:      4001,
-	RejectError:     4002,
-	MethodError:     4003,
-	ParamLack:       4004,
+	ParamError:      420,
+	ParamLack:       421,
 	UserExistsError: 4005,
 	QueryError:      4006,
 	EmptyError:      4007,
