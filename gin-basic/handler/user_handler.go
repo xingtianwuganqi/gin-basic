@@ -1,100 +1,100 @@
 package handler
 
 import (
-	"errors"
-	"pet-project/db"
-	"pet-project/middleware"
-	"pet-project/models"
-	"pet-project/response"
-	"pet-project/util"
-
+	"gin-basic/models"
+	"gin-basic/response"
+	"gin-basic/service"
+	"gin-basic/logger"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"go.uber.org/zap"
 )
 
-type LoginInfo struct {
-	Phone    string `form:"phone" json:"phone" binding:"required"`
-	Password string `form:"password" json:"password"`
-	Code     string `form:"code" json:"code"`
-}
-
-type LoginUserInfo struct {
-	UserId uint   `json:"userId"`
-	Phone  string `json:"phone"`
-	Email  string `json:"email"`
-	Avatar string `json:"avatar"`
-	Token  string `json:"token"`
-}
-
-// UserRegister 注册
+// UserRegister 用户注册
 func UserRegister(c *gin.Context) {
-	var login LoginInfo
-	if err := c.ShouldBind(&login); err != nil {
-		response.Fail(c, util.ApiCode.ParamError, util.ApiMessage.ParamError)
+	logger.Logger.Info("Received user registration request", 
+		zap.String("clientIP", c.ClientIP()), 
+		zap.String("method", c.Request.Method))
+	
+	var req models.RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Logger.Warn("Invalid parameters for user registration", zap.Error(err))
+		response.Fail(c, response.ApiCode.ParamErr, response.ApiMsg.ParamErr)
 		return
 	}
-	var findUser models.UserInfo
-	findResult := db.DB.Where("phone = ?", login.Phone).First(&findUser)
-	if errors.Is(findResult.Error, gorm.ErrRecordNotFound) {
-		user := models.UserInfo{
-			Phone:    login.Phone,
-			Password: login.Password,
-		}
-		result := db.DB.Create(&user)
-		if result.Error != nil {
-			response.Fail(c, util.ApiCode.CreateErr, util.ApiMessage.CreateErr)
-			return
-		}
-		userId := user.ID
-		token, err := middleware.GenToken(userId)
-		if err != nil {
-			response.Fail(c, util.ApiCode.ServerError, util.ApiMessage.ServerError)
-			return
-		}
-		data := LoginUserInfo{
-			UserId: user.ID,
-			Phone:  user.Phone,
-			Avatar: user.Avatar,
-			Email:  user.Email,
-			Token:  token,
-		}
-		response.Success(c, data)
-	} else {
-		response.Fail(c, util.ApiCode.UserExistsError, util.ApiMessage.UserExistsError)
+
+	err := service.RegisterUser(req)
+	if err != nil {
+		logger.Logger.Error("User registration failed", zap.Error(err))
+		response.Fail(c, response.ApiCode.CreateErr, response.ApiMsg.CreateErr)
+		return
 	}
 
+	logger.Logger.Info("User registration successful", zap.String("email", req.Email))
+	response.Success(c, gin.H{
+		"message": "User registered successfully",
+	})
 }
 
-// UserPhoneLogin 用户登录
-func UserPhoneLogin(c *gin.Context) {
-	var login LoginInfo
-	if err := c.ShouldBind(&login); err != nil {
-		response.Fail(c, util.ApiCode.ParamError, util.ApiMessage.ParamError)
+// UserLogin 用户登录
+func UserLogin(c *gin.Context) {
+	logger.Logger.Info("Received user login request", 
+		zap.String("clientIP", c.ClientIP()), 
+		zap.String("method", c.Request.Method))
+	
+	var req models.LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Logger.Warn("Invalid parameters for user login", zap.Error(err))
+		response.Fail(c, response.ApiCode.ParamErr, response.ApiMsg.ParamErr)
 		return
 	}
-	var user models.UserInfo
-	result := db.DB.Where("phone = ?", login.Phone).First(&user)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		response.Fail(c, util.ApiCode.QueryError, "该手机号未注册")
+
+	result, err := service.LoginUser(req)
+	if err != nil {
+		logger.Logger.Error("User login failed", zap.Error(err))
+		response.Fail(c, response.ApiCode.UserNotFound, response.ApiMsg.UserNotFound)
 		return
 	}
-	if user.Password == login.Password {
-		// 密码正确, 生成token，登录完成
-		userId := user.ID
-		token, err := middleware.GenToken(userId)
-		if err != nil {
-			response.Fail(c, util.ApiCode.ServerError, util.ApiMessage.ServerError)
-			return
-		}
-		data := LoginUserInfo{
-			UserId: user.ID,
-			Phone:  user.Phone,
-			Avatar: user.Avatar,
-			Email:  user.Email,
-			Token:  token,
-		}
-		response.Success(c, data)
-	} else {
-		response.Fail(c, 300, "密码错误")
+
+	logger.Logger.Info("User login successful", zap.String("email", req.Email))
+	response.Success(c, result)
+}
+
+// GetUserInfo 获取用户信息
+func GetUserInfo(c *gin.Context) {
+	email := c.Query("email")
+	if email == "" {
+		logger.Logger.Warn("Email parameter is required")
+		response.Fail(c, response.ApiCode.ParamErr, response.ApiMsg.ParamErr)
+		return
 	}
+
+	logger.Logger.Info("Received user info retrieval request", 
+		zap.String("email", email),
+		zap.String("clientIP", c.ClientIP()), 
+		zap.String("method", c.Request.Method))
+
+	result, err := service.GetUserInfo(email)
+	if err != nil {
+		logger.Logger.Error("Failed to retrieve user info", zap.Error(err))
+		response.Fail(c, response.ApiCode.UserNotFound, response.ApiMsg.UserNotFound)
+		return
+	}
+
+	logger.Logger.Info("User info retrieved successfully", zap.String("email", email))
+	response.Success(c, result)
+}
+
+// HealthCheck 健康检查端点
+func HealthCheck(c *gin.Context) {
+	logger.Logger.Info("Health check endpoint called", zap.String("clientIP", c.ClientIP()))
+
+	healthInfo := map[string]interface{}{
+		"status":    "healthy",
+		"timestamp": "2026-01-18T14:41:06+08:00",
+		"service":   "gin-basic",
+	}
+
+	logger.Logger.Info("Health check completed", zap.String("status", healthInfo["status"].(string)))
+
+	c.JSON(200, healthInfo)
 }

@@ -1,69 +1,48 @@
 package settings
 
 import (
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
+	"gopkg.in/yaml.v3"
 	"os"
 )
 
 type Config struct {
-	Database struct {
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		DataBase string `yaml:"database"`
-		Charset  string `yaml:"charset"`
-	} `yaml:"database"`
-
-	App struct {
-		Port      int    `yaml:"port"`
-		Debug     bool   `yaml:"debug"`
-		LogLevel  string `yaml:"log_level"`
-		SecretKey string `yaml:"secret_key"`
-		Env       string `yaml:"env"`
-	} `yaml:"app"`
-	ApiKeys struct {
-		Google   string `yaml:"google"`
-		Facebook string `yaml:"facebook"`
-	} `yaml:"api_keys"`
+	App App  `yaml:"app"`
+	Log Log  `yaml:"log"`
 }
 
-// 配置开发环境
-var env = getEnvironment()
-var Conf Config
-
-func getEnvironment() string {
-	env := os.Getenv("ENVIRONMENT")
-	if env == "" {
-		// 如果未设置 ENVIRONMENT 环境变量，默认为开发环境
-		return "dev"
-	}
-	return env
+type App struct {
+	Port      int    `yaml:"port"`
+	Debug     bool   `yaml:"debug"`
+	LogLevel  string `yaml:"log_level"`
+	SecretKey string `yaml:"secret_key"`
+	Env       string `yaml:"env"`
 }
 
-func LoadConfig() error {
-	configFile := "config/dev.yaml" // 默认使用开发环境配置
-	if env == "production" {
-		configFile = "/config/production.yaml"
-	} else if env == "dev" {
-		configFile = "/config/dev.yaml"
-	} else {
-		configFile = "config/local.yaml"
+type Log struct {
+	Filename   string `yaml:"filename"`
+	MaxSize    int    `yaml:"max_size"`
+	MaxBackups int    `yaml:"max_backups"`
+	MaxAge     int    `yaml:"max_age"`
+	Compress   bool   `yaml:"compress"`
+}
+
+var Conf = &Config{}
+
+func InitConf() {
+	environment := os.Getenv("ENVIRONMENT")
+	if environment == "" {
+		environment = "local" // 默认环境
 	}
-	// 读取配置文件
-	data, err := ioutil.ReadFile(configFile)
+
+	configPath := "config/" + environment + ".yaml"
+
+	data, err := os.ReadFile(configPath)
 	if err != nil {
-		// 处理错误
-		return err
+		panic("Failed to read config file: " + configPath + ", error: " + err.Error())
 	}
 
-	// 解析配置
-	var configInfo Config
-	if err := yaml.Unmarshal(data, &configInfo); err != nil {
-		// 处理错误
-		return err
+	err = yaml.Unmarshal(data, Conf)
+	if err != nil {
+		panic("Failed to parse config file, error: " + err.Error())
 	}
-	Conf = configInfo
-	return nil
 }

@@ -1,0 +1,2 @@
+{"level":"INFO","time":"2026-01-18T14:54:24.161+0800","caller":"gin-basic/main.go:26","msg":"Starting server","port":8080,"env":"local"}
+{"level":"INFO","time":"2026-01-18T14:55:46.502+0800","caller":"gin-basic/main.go:26","msg":"Starting server","port":8080,"env":"local"}

@@ -1,53 +1,38 @@
-# 使用官方的 Go 镜像作为基础镜像
-FROM golang:1.20 as build
-
-ENV GOPROXY=https://goproxy.cn,direct
+# 使用官方Golang镜像作为构建环境
+FROM golang:1.23-alpine AS builder
 
 # 设置工作目录
-WORKDIR /app/pro
+WORKDIR /app
 
-# 复制项目代码到容器中
-#COPY . .
-COPY . /app
-COPY ./config /config
+# 复制go.mod和go.sum文件
+COPY go.mod go.sum ./
 
-# 编译 Go 项目
-RUN go build -o main
+# 下载依赖
+RUN go mod download
 
-# 第二阶段：开发环境
-#FROM alpine:latest as dev
-##
-#WORKDIR /app
-##
-### 从第一阶段复制编译后的可执行文件
-#COPY --from=build /app/main .
-##
-### 设置生产环境的配置
-#COPY --from=build /config /config
-##
-### 设置环境变量
-#ENV ENVIRONMENT=dev
+# 复制源代码
+COPY . .
 
-# 第三阶段：生产环境
-#FROM alpine:latest as production
-#
-#WORKDIR /app
-#
-## 从第一阶段复制编译后的可执行文件
-#COPY --from=build /app/main .
-#
-### 设置生产环境的配置
+# 构建应用
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
-#
-## 设置环境变量
-#ENV ENVIRONMENT=production
+# 使用alpine作为基础镜像创建最终镜像
+FROM alpine:latest
 
-# 暴露应用程序端口
-EXPOSE 8082
+# 安装ca-certificates，以便应用可以发出HTTPS请求
+RUN apk --no-cache add ca-certificates
 
-# 启动应用程序
+WORKDIR /root/
+
+# 从builder镜像复制二进制文件
+COPY --from=builder /app/main .
+
+# 复制配置文件
+COPY config/ config/
+COPY locales/ locales/
+
+# 暴露端口
+EXPOSE 8080
+
+# 运行二进制文件
 CMD ["./main"]
-
-
-
-

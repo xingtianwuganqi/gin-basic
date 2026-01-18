@@ -1,18 +1,14 @@
-database:
-  host: 172.17.0.1
-  port: 3306
-  username: petproject
-  password: YhKiwmATtRJ2Jhme
-  database: petproject
-  charset: utf8mb4
-
 app:
   port: 8082
   debug: false
-  log_level: debug
+  log_level: info
   secret_key: testsecret
   env: production
 
-api_keys:
-  google: test-google-api-key
-  facebook: test-facebook-api-key
+# 添加日志配置
+log:
+  filename: "logs/app.log"
+  max_size: 100    # 日志文件最大 100MB
+  max_backups: 10  # 最多保留 10 个备份文件
+  max_age: 30      # 文件最多保存 30 天
+  compress: true   # 压缩旧文件
