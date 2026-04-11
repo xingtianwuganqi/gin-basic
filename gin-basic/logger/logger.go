@@ -2,26 +2,30 @@ package logger
 
 import (
 	"gin-basic/settings"
+	"os"
+	"strings"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"github.com/natefinch/lumberjack"
-	"os"
 )
 
 var Logger *zap.Logger
 
 func InitLogger() {
-	// 获取配置
-	logConfig := settings.Conf.Log
-
-	// 创建Encoder
 	encoder := getEncoder()
+	logLevel := getLogLevel(settings.Conf.App.LogLevel)
 
-	// 创建WriteSyncer
-	writeSyncer := getLogWriter(logConfig.Filename, logConfig.MaxSize, logConfig.MaxBackups, logConfig.MaxAge, logConfig.Compress)
+	stdoutLevel := zap.LevelEnablerFunc(func(level zapcore.Level) bool {
+		return level >= logLevel && level < zapcore.ErrorLevel
+	})
+	stderrLevel := zap.LevelEnablerFunc(func(level zapcore.Level) bool {
+		return level >= logLevel && level >= zapcore.ErrorLevel
+	})
 
-	// 创建Core
-	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
+	core := zapcore.NewTee(
+		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), stdoutLevel),
+		zapcore.NewCore(encoder, zapcore.AddSync(os.Stderr), stderrLevel),
+	)
 
 	Logger = zap.New(core, zap.AddCaller())
 }
@@ -45,20 +49,17 @@ func getEncoder() zapcore.Encoder {
 	return zapcore.NewJSONEncoder(encoderConfig)
 }
 
-func getLogWriter(filename string, maxSize, maxBackup, maxAge int, compress bool) zapcore.WriteSyncer {
-	// 创建日志目录
-	if err := os.MkdirAll("logs", 0755); err != nil {
-		panic(err)
+func getLogLevel(level string) zapcore.Level {
+	switch strings.ToLower(strings.TrimSpace(level)) {
+	case "debug":
+		return zapcore.DebugLevel
+	case "warn", "warning":
+		return zapcore.WarnLevel
+	case "error":
+		return zapcore.ErrorLevel
+	default:
+		return zapcore.InfoLevel
 	}
-	lumberJackLogger := &lumberjack.Logger{
-		Filename:   filename,
-		MaxSize:    maxSize,
-		MaxBackups: maxBackup,
-		MaxAge:     maxAge,
-		Compress:   compress,
-	}
-
-	return zapcore.AddSync(lumberJackLogger)
 }
 
 // Debug logs a message at DebugLevel. The message includes any fields passed.
@@ -93,5 +94,8 @@ func Fatal(message string, fields ...zap.Field) {
 
 // Sync flushes any buffered log entries.
 func Sync() error {
+	if Logger == nil {
+		return nil
+	}
 	return Logger.Sync()
 }

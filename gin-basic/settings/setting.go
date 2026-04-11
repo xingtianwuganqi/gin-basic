@@ -1,13 +1,13 @@
 package settings
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	App App  `yaml:"app"`
-	Log Log  `yaml:"log"`
+	App App `yaml:"app"`
 }
 
 type App struct {
@@ -16,14 +16,6 @@ type App struct {
 	LogLevel  string `yaml:"log_level"`
 	SecretKey string `yaml:"secret_key"`
 	Env       string `yaml:"env"`
-}
-
-type Log struct {
-	Filename   string `yaml:"filename"`
-	MaxSize    int    `yaml:"max_size"`
-	MaxBackups int    `yaml:"max_backups"`
-	MaxAge     int    `yaml:"max_age"`
-	Compress   bool   `yaml:"compress"`
 }
 
 var Conf = &Config{}
