@@ -5,3 +5,36 @@ app:
   secret_key: testsecret
   env: local
 
+database:
+  host: --.---.---.---
+  port: --
+  username: --
+  password: --
+  database: --
+  charset: --
+
+api_keys:
+  openai: --
+
+apple_keys:
+  apple_iap_key_id: --
+  apple_iap_issuer_id: --
+  apple_bundle_id: --
+  apple_iap_private_key_path: --
+  apple_iap_base_url: --
+  apple_iap_sandbox_base_url: --
+
+push_service:
+  apns_key_id: --
+  apns_team_id: --
+  apns_topic: --
+  apns_private_key_path: --
+  apns_base_url: --
+  apns_sandbox_base_url: --
+  use_sandbox: --
+
+email_service:
+  host: --
+  port: --
+  username: --
+  password: --

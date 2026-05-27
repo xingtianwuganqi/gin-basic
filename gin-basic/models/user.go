@@ -11,6 +11,7 @@ type User struct {
 	Email     string    `json:"email" binding:"required,email" gorm:"size:100"`
 	Password  string    `json:"password" binding:"required" gorm:"size:255"`
 	Phone     string    `json:"phone" gorm:"size:20"`
+	Role	  string    `json:"role" gorm:"size:20;default:'user'"`
 }
 
 type RegisterRequest struct {
