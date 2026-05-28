@@ -15,18 +15,21 @@ func SetupRouter() *gin.Engine {
 	} else {
 		gin.SetMode(gin.DebugMode)
 	}
-	
+
 	bundle := internal.ReloadLocalBundle()
 	r := gin.Default()
-	
+
 	// 添加健康检查路由
 	r.GET("/health", handler.HealthCheck)
-	
+
 	// 添加国际化中间件
 	r.Use(middleware.LocaleMiddleware(bundle))
-	
+
 	// 注册用户相关路由
 	RegisterUserRouter(r)
-	
+	RegisterPayRouter(r)
+	RegisterAdminRouter(r)
+	RegisterSysDictRouter(r)
+
 	return r
 }

@@ -47,7 +47,18 @@ func linkInit() {
 func autoMigrateTable() {
 	err := DB.AutoMigrate(
 		&models.User{},
-		
+		&models.AppVersion{},
+		&models.SysDictType{},
+		&models.SysDictItem{},
+		&models.UserEvent{},
+		&models.PushDevice{},
+		&models.Subscription{},
+		&models.Transaction{},
+		&models.SubscriptionUsage{},
+		&models.UsageLedger{},
+		&models.NotificationLog{},
+		&models.UserCredit{},
+		&models.CreditLog{},
 	)
 	if err != nil {
 		logger.Logger.Error("AutoMigrate failed",
@@ -55,9 +66,6 @@ func autoMigrateTable() {
 		panic("AutoMigrate failed: " + err.Error())
 	}
 }
-
-
-
 
 // func linkRedis() {
 // 	addr := fmt.Sprintf("%s:%d", settings.Conf.Redis.Host, settings.Conf.Redis.Port)

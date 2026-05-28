@@ -57,6 +57,9 @@ type Codes struct {
 	// #业务上的错误（如用户已存在）
 	UserExistsErr uint // 409 // RFC 9110, 15.5.10
 
+	// #资源冲突（任务冲突等）
+	ConflictErr uint // 409 // RFC 9110, 15.5.10
+
 	// #查询失败（数据库错误等）
 	QueryErr uint // 500 // RFC 9110, 15.6.1
 
@@ -95,6 +98,9 @@ type Codes struct {
 
 	// #验证码错误
 	CheckCodeErr uint
+
+	// #额度不足
+	QuotaErr uint
 }
 
 var ApiCode = &Codes{
@@ -109,6 +115,7 @@ var ApiCode = &Codes{
 	MethodErr:     405,
 	ParamLack:     400,
 	UserExistsErr: 409,
+	ConflictErr:   409,
 	QueryErr:      500,
 	EmptyErr:      200,
 	CleanUp:       503,
@@ -122,6 +129,7 @@ var ApiCode = &Codes{
 	UpdateErr:     500,
 	PasswordErr:   400,
 	CheckCodeErr:  400,
+	QuotaErr:      501,
 }
 
 type Messages struct {
@@ -157,6 +165,9 @@ type Messages struct {
 
 	// #业务上的错误（如用户已存在）
 	UserExistsErr string // 409 // RFC 9110, 15.5.10
+
+	// #资源冲突（任务冲突等）
+	ConflictErr string // 409 // RFC 9110, 15.5.10
 
 	// #查询失败（数据库错误等）
 	QueryErr string // 500 // RFC 9110, 15.6.1
@@ -196,6 +207,9 @@ type Messages struct {
 
 	// #验证码错误
 	CheckCodeErr string
+
+	// #额度不足
+	QuotaErr string
 }
 
 var ApiMsg = &Messages{
@@ -210,6 +224,7 @@ var ApiMsg = &Messages{
 	MethodErr:     "MethodErr",
 	ParamLack:     "ParamLack",
 	UserExistsErr: "UserExistsErr",
+	ConflictErr:   "ConflictErr",
 	QueryErr:      "QueryErr",
 	EmptyErr:      "EmptyErr",
 	CleanUp:       "CleanUp",
@@ -223,4 +238,5 @@ var ApiMsg = &Messages{
 	UpdateErr:     "UpdateErr",
 	PasswordErr:   "PasswordErr",
 	CheckCodeErr:  "CheckCodeErr",
+	QuotaErr:      "QuotaErr",
 }

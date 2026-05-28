@@ -151,7 +151,7 @@ func AdminOnly() gin.HandlerFunc {
 
 		// 查询这个user是不是空
 		var user models.User
-		userResult := db.DB.Where("device_id = ?", mc.DeviceId).Find(&user)
+		userResult := db.DB.Where("device_id = ?", mc.DeviceId).First(&user)
 		if errors.Is(userResult.Error, gorm.ErrRecordNotFound) {
 			response.Fail(c, response.ApiCode.UserNotFound, response.ApiMsg.UserNotFound)
 			c.Abort()
@@ -199,8 +199,8 @@ func OptionalJWTMiddleware() gin.HandlerFunc {
 		// 查询用户是否存在
 		var user models.User
 		err = db.DB.
-			Select("deviceId").
-			Where("deviceId = ?", mc.DeviceId).
+			Select("id").
+			Where("device_id = ?", mc.DeviceId).
 			First(&user).Error
 
 		if err != nil {
